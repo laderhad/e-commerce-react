@@ -1,46 +1,34 @@
+using System.Threading.Tasks;
+using API.Data;
 using API.Entity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
-public class ProductController:ControllerBase{
+public class ProductsController:ControllerBase{
+    private readonly DataContext _context;
+
+    public ProductsController(DataContext context)
+    {
+        _context = context;
+    }
 
     [HttpGet]
-    public IActionResult GetProducts(){
-        return Ok(new List<Product> { 
-            new Product { 
-            Id = 1, 
-            Name = "iPhone 15", 
-            Description = "Apple iPhone 15, 128GB, Black", 
-            ImageUrl = "iphone15.jpg", 
-            Price = 600, 
-            IsActive = true, 
-            Stock = 100 },
-
-            new Product { 
-            Id = 2, 
-            Name = "iPhone 16", 
-            Description = "Apple iPhone 16, 128GB, Black", 
-            ImageUrl = "iphone16.jpg", 
-            Price = 800, 
-            IsActive = true, 
-            Stock = 100
-            }
-        });
+    public async Task<IActionResult> GetProducts(){
+        var products= await _context.Products.ToListAsync();
+        return Ok(products);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetProduct(int id){
-        return Ok(new Product { 
-            Id = 1, 
-            Name = "iPhone 15", 
-            Description = "Apple iPhone 15, 128GB, Black", 
-            ImageUrl = "iphone15.jpg", 
-            Price = 600, 
-            IsActive = true, 
-            Stock = 100 }
-        );
+    public async Task<IActionResult> GetProduct(int? id){
+        if(id==null){
+            return NotFound();
+
+        }
+        var product = await _context.Products.FindAsync(id);
+        return Ok(product);
     }
 }
